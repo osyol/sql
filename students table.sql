@@ -37,3 +37,33 @@ SELECT first_name, last_name
 FROM students
 GROUP BY first_name, last_name
 HAVING COUNT(*) > 1;
+
+-- удаление повторяющихся значений имён и фамилий
+DELETE FROM students WHERE student_id IN(
+SELECT student_id FROM
+(SELECT student_id, ROW_NUMBER() OVER (PARTITION BY first_name, last_name ORDER BY student_id)
+AS StudentNumber FROM students)
+t WHERE StudentNumber > 1
+);
+
+SELECT * FROM students ORDER BY student_id;
+
+-- удаление повторяющихся имён
+DELETE FROM students WHERE student_id IN(
+SELECT student_id FROM
+(SELECT student_id, ROW_NUMBER() OVER (PARTITION BY first_name ORDER BY student_id)
+AS unique_name FROM students)
+s1 WHERE unique_name > 1
+);
+
+SELECT * FROM students;
+
+-- удаление повторяющихся фамилий
+DELETE FROM students WHERE student_id IN(
+SELECT student_id FROM
+(SELECT student_id, ROW_NUMBER() OVER (PARTITION BY last_name ORDER BY student_id)
+AS unique_lastname FROM students)
+s2 WHERE unique_lastname > 1
+);
+
+SELECT * FROM students;
